@@ -1,0 +1,741 @@
+openapi: 3.1.0
+info:
+  title: Conecta Campus API
+  version: 1.0.0
+  description: |
+    Contrato HTTP da V1. Fonte da verdade para paths, JSON e códigos de status.
+    Comportamento de produto e cortes: ../SPEC.md
+    Não adicione path ou campo sem atualizar o SPEC no mesmo commit.
+servers:
+  - url: https://api.conecta-campus.local/v1
+    description: Prefixo /v1. O app publicado na loja atualiza devagar.
+tags:
+  - name: health
+  - name: auth
+  - name: demandas
+  - name: candidaturas
+  - name: moderacao
+  - name: usuarios
+  - name: notificacoes
+
+paths:
+  /health:
+    get:
+      operationId: getHealth
+      tags: [health]
+      summary: Liveness
+      responses:
+        "200":
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: object
+                required: [status]
+                properties:
+                  status:
+                    type: string
+                    enum: [ok]
+
+  /auth:
+    post:
+      operationId: postAuth
+      tags: [auth]
+      summary: Login com e-mail institucional
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/AuthRequest"
+      responses:
+        "200":
+          description: Sessão
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/AuthResponse"
+        "400":
+          $ref: "#/components/responses/Error"
+        "401":
+          $ref: "#/components/responses/Error"
+
+  /me:
+    get:
+      operationId: getMe
+      tags: [auth]
+      summary: Perfil da sessão
+      security: [{ bearerAuth: [] }]
+      responses:
+        "200":
+          description: Usuário autenticado
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Usuario"
+        "401":
+          $ref: "#/components/responses/Error"
+
+  /demandas:
+    get:
+      operationId: listDemandas
+      tags: [demandas]
+      summary: Feed paginado (card compacto)
+      security: [{ bearerAuth: [] }]
+      parameters:
+        - $ref: "#/components/parameters/After"
+        - $ref: "#/components/parameters/Limit"
+        - name: q
+          in: query
+          schema: { type: string }
+        - name: area
+          in: query
+          schema: { type: string }
+        - name: habilidade
+          in: query
+          schema: { type: string }
+        - name: status
+          in: query
+          schema:
+            $ref: "#/components/schemas/DemandaStatus"
+      responses:
+        "200":
+          description: Página de cards
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/DemandaList"
+              examples:
+                ok:
+                  $ref: "#/components/examples/DemandaListOk"
+        "401":
+          $ref: "#/components/responses/Error"
+    post:
+      operationId: postDemanda
+      tags: [demandas]
+      summary: Publicar demanda
+      security: [{ bearerAuth: [] }]
+      parameters:
+        - $ref: "#/components/parameters/IdempotencyKey"
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/DemandaCreate"
+      responses:
+        "201":
+          description: Criada (status aberta)
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/DemandaDetalhe"
+        "400":
+          $ref: "#/components/responses/Error"
+        "401":
+          $ref: "#/components/responses/Error"
+
+  /demandas/{id}:
+    get:
+      operationId: getDemanda
+      tags: [demandas]
+      summary: Detalhe (contato só após aceite)
+      security: [{ bearerAuth: [] }]
+      parameters:
+        - $ref: "#/components/parameters/DemandaId"
+      responses:
+        "200":
+          description: Detalhe
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/DemandaDetalhe"
+        "401":
+          $ref: "#/components/responses/Error"
+        "404":
+          $ref: "#/components/responses/Error"
+    patch:
+      operationId: patchDemanda
+      tags: [demandas]
+      summary: Status, concluir, arquivar (só responsável)
+      security: [{ bearerAuth: [] }]
+      parameters:
+        - $ref: "#/components/parameters/DemandaId"
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/DemandaPatch"
+      responses:
+        "200":
+          description: Atualizada
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/DemandaDetalhe"
+        "400":
+          $ref: "#/components/responses/Error"
+        "401":
+          $ref: "#/components/responses/Error"
+        "403":
+          $ref: "#/components/responses/Error"
+        "404":
+          $ref: "#/components/responses/Error"
+        "409":
+          $ref: "#/components/responses/Error"
+
+  /demandas/{id}/candidaturas:
+    post:
+      operationId: postCandidatura
+      tags: [candidaturas]
+      summary: Quero ajudar
+      security: [{ bearerAuth: [] }]
+      parameters:
+        - $ref: "#/components/parameters/DemandaId"
+        - $ref: "#/components/parameters/IdempotencyKey"
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/CandidaturaCreate"
+      responses:
+        "201":
+          description: Pendente
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Candidatura"
+        "400":
+          $ref: "#/components/responses/Error"
+        "401":
+          $ref: "#/components/responses/Error"
+        "404":
+          $ref: "#/components/responses/Error"
+        "409":
+          $ref: "#/components/responses/Error"
+
+  /demandas/{id}/candidaturas/{cid}:
+    patch:
+      operationId: patchCandidatura
+      tags: [candidaturas]
+      summary: Aceitar, recusar ou cancelar
+      security: [{ bearerAuth: [] }]
+      parameters:
+        - $ref: "#/components/parameters/DemandaId"
+        - name: cid
+          in: path
+          required: true
+          schema: { type: string }
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/CandidaturaPatch"
+      responses:
+        "200":
+          description: Atualizada
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Candidatura"
+        "400":
+          $ref: "#/components/responses/Error"
+        "401":
+          $ref: "#/components/responses/Error"
+        "403":
+          $ref: "#/components/responses/Error"
+        "404":
+          $ref: "#/components/responses/Error"
+        "409":
+          $ref: "#/components/responses/Error"
+
+  /demandas/{id}/denuncias:
+    post:
+      operationId: postDenuncia
+      tags: [moderacao]
+      summary: Denunciar (não oculta sozinha)
+      security: [{ bearerAuth: [] }]
+      parameters:
+        - $ref: "#/components/parameters/DemandaId"
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/DenunciaCreate"
+      responses:
+        "201":
+          description: Na fila
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Denuncia"
+        "401":
+          $ref: "#/components/responses/Error"
+        "404":
+          $ref: "#/components/responses/Error"
+
+  /demandas/{id}/ocultar:
+    post:
+      operationId: postOcultarDemanda
+      tags: [moderacao]
+      summary: Soft delete (moderador)
+      security: [{ bearerAuth: [] }]
+      parameters:
+        - $ref: "#/components/parameters/DemandaId"
+      responses:
+        "204":
+          description: Oculta
+        "401":
+          $ref: "#/components/responses/Error"
+        "403":
+          $ref: "#/components/responses/Error"
+        "404":
+          $ref: "#/components/responses/Error"
+
+  /usuarios/{id}:
+    get:
+      operationId: getUsuario
+      tags: [usuarios]
+      summary: Perfil básico
+      security: [{ bearerAuth: [] }]
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema: { type: string }
+      responses:
+        "200":
+          description: Perfil
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/UsuarioPublico"
+        "401":
+          $ref: "#/components/responses/Error"
+        "404":
+          $ref: "#/components/responses/Error"
+
+  /notificacoes:
+    get:
+      operationId: listNotificacoes
+      tags: [notificacoes]
+      summary: Central in-app
+      security: [{ bearerAuth: [] }]
+      parameters:
+        - $ref: "#/components/parameters/After"
+        - $ref: "#/components/parameters/Limit"
+      responses:
+        "200":
+          description: Lista
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/NotificacaoList"
+        "401":
+          $ref: "#/components/responses/Error"
+
+  /notificacoes/{id}:
+    patch:
+      operationId: patchNotificacao
+      tags: [notificacoes]
+      summary: Marcar lida
+      security: [{ bearerAuth: [] }]
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema: { type: string }
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required: [lida]
+              properties:
+                lida: { type: boolean }
+      responses:
+        "200":
+          description: Atualizada
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Notificacao"
+        "401":
+          $ref: "#/components/responses/Error"
+        "404":
+          $ref: "#/components/responses/Error"
+
+components:
+  securitySchemes:
+    bearerAuth:
+      type: http
+      scheme: bearer
+      bearerFormat: JWT
+
+  parameters:
+    DemandaId:
+      name: id
+      in: path
+      required: true
+      schema: { type: string }
+    After:
+      name: after
+      in: query
+      schema: { type: string }
+      description: Cursor opaco da página anterior.
+    Limit:
+      name: limit
+      in: query
+      schema:
+        type: integer
+        minimum: 1
+        maximum: 50
+        default: 20
+    IdempotencyKey:
+      name: Idempotency-Key
+      in: header
+      required: true
+      schema:
+        type: string
+        format: uuid
+
+  responses:
+    Error:
+      description: Erro no envelope padrão
+      content:
+        application/json:
+          schema:
+            $ref: "#/components/schemas/ErrorEnvelope"
+          examples:
+            validation:
+              $ref: "#/components/examples/ErrorValidation"
+
+  examples:
+    DemandaListOk:
+      value:
+        items:
+          - id: "d_01"
+            titulo: "Sensores na estufa do bloco B"
+            area: "Agronomia"
+            habilidades: ["TI", "Sensores"]
+            preview: "Precisamos ligar umidade do solo a um painel no celular."
+            status: aberta
+            autorNome: "Ana Souza"
+            autorPapel: professor
+            createdAt: "2026-08-20T14:00:00Z"
+        paging:
+          nextCursor: "d_01"
+          hasMore: true
+    ErrorValidation:
+      value:
+        error:
+          code: VALIDATION_ERROR
+          message: "Corrija os campos destacados."
+          fields:
+            titulo: "obrigatório"
+            problema: "mínimo 40 caracteres"
+
+  schemas:
+    Papel:
+      type: string
+      enum: [aluno, professor, moderador]
+    DemandaStatus:
+      type: string
+      enum: [aberta, em_andamento, concluida, arquivada, cancelada]
+    CandidaturaStatus:
+      type: string
+      enum: [pendente, aceita, recusada, cancelada]
+    CategoriaAjuda:
+      type: string
+      enum: [programar, desenhar, analisar_dados, sensores, escrita, campo, outro]
+
+    AuthRequest:
+      type: object
+      required: [email]
+      properties:
+        email:
+          type: string
+          format: email
+        codigo:
+          type: string
+          description: Código de uso único, quando o fluxo não for só e-mail.
+
+    AuthResponse:
+      type: object
+      required: [token, usuario]
+      properties:
+        token: { type: string }
+        usuario:
+          $ref: "#/components/schemas/Usuario"
+
+    Usuario:
+      type: object
+      required: [id, nome, email, papel]
+      properties:
+        id: { type: string }
+        nome: { type: string }
+        email: { type: string }
+        papel:
+          $ref: "#/components/schemas/Papel"
+        curso: { type: string }
+        semestre: { type: string }
+
+    UsuarioPublico:
+      type: object
+      required: [id, nome, papel]
+      properties:
+        id: { type: string }
+        nome: { type: string }
+        papel:
+          $ref: "#/components/schemas/Papel"
+        curso: { type: string }
+        semestre: { type: string }
+        demandasPublicadas:
+          type: array
+          items:
+            $ref: "#/components/schemas/DemandaCard"
+        demandasParticipando:
+          type: array
+          items:
+            $ref: "#/components/schemas/DemandaCard"
+        demandasConcluidas:
+          type: array
+          items:
+            $ref: "#/components/schemas/DemandaCard"
+
+    Paging:
+      type: object
+      required: [hasMore]
+      properties:
+        nextCursor:
+          type: string
+          nullable: true
+        hasMore: { type: boolean }
+
+    DemandaCard:
+      type: object
+      required: [id, titulo, area, habilidades, preview, status, createdAt]
+      properties:
+        id: { type: string }
+        titulo: { type: string }
+        area: { type: string }
+        habilidades:
+          type: array
+          items: { type: string }
+        preview:
+          type: string
+          description: 1-2 linhas. Nunca o problema completo.
+        status:
+          $ref: "#/components/schemas/DemandaStatus"
+        autorNome: { type: string }
+        autorPapel:
+          $ref: "#/components/schemas/Papel"
+        createdAt:
+          type: string
+          format: date-time
+
+    DemandaList:
+      type: object
+      required: [items, paging]
+      properties:
+        items:
+          type: array
+          items:
+            $ref: "#/components/schemas/DemandaCard"
+        paging:
+          $ref: "#/components/schemas/Paging"
+
+    DemandaCreate:
+      type: object
+      required: [titulo, area, problema, resultadoEsperado, habilidades]
+      properties:
+        titulo: { type: string }
+        area: { type: string }
+        problema: { type: string }
+        resultadoEsperado: { type: string }
+        habilidades:
+          type: array
+          items: { type: string }
+          minItems: 1
+        links:
+          type: array
+          items:
+            type: string
+            format: uri
+
+    DemandaPatch:
+      type: object
+      properties:
+        status:
+          $ref: "#/components/schemas/DemandaStatus"
+        resultadoUrl:
+          type: string
+          format: uri
+        titulo: { type: string }
+        problema: { type: string }
+        resultadoEsperado: { type: string }
+        habilidades:
+          type: array
+          items: { type: string }
+        links:
+          type: array
+          items:
+            type: string
+            format: uri
+
+    Contato:
+      type: object
+      required: [email]
+      description: Ausente no JSON até candidatura aceita (ou canal público do autor).
+      properties:
+        email: { type: string, format: email }
+        link:
+          type: string
+          format: uri
+
+    DemandaDetalhe:
+      type: object
+      required:
+        - id
+        - titulo
+        - area
+        - problema
+        - resultadoEsperado
+        - habilidades
+        - status
+        - responsavel
+        - createdAt
+        - updatedAt
+        - lastActivityAt
+      properties:
+        id: { type: string }
+        titulo: { type: string }
+        area: { type: string }
+        problema: { type: string }
+        resultadoEsperado: { type: string }
+        habilidades:
+          type: array
+          items: { type: string }
+        links:
+          type: array
+          items:
+            type: string
+            format: uri
+        status:
+          $ref: "#/components/schemas/DemandaStatus"
+        resultadoUrl:
+          type: string
+          format: uri
+        responsavel:
+          $ref: "#/components/schemas/Usuario"
+        contato:
+          $ref: "#/components/schemas/Contato"
+        candidaturas:
+          type: array
+          items:
+            $ref: "#/components/schemas/Candidatura"
+        createdAt: { type: string, format: date-time }
+        updatedAt: { type: string, format: date-time }
+        lastActivityAt: { type: string, format: date-time }
+
+    CandidaturaCreate:
+      type: object
+      required: [categoria, mensagem]
+      properties:
+        categoria:
+          $ref: "#/components/schemas/CategoriaAjuda"
+        mensagem: { type: string }
+
+    CandidaturaPatch:
+      type: object
+      required: [status]
+      properties:
+        status:
+          $ref: "#/components/schemas/CandidaturaStatus"
+
+    Candidatura:
+      type: object
+      required: [id, demandaId, usuarioId, categoria, mensagem, status, createdAt]
+      properties:
+        id: { type: string }
+        demandaId: { type: string }
+        usuarioId: { type: string }
+        categoria:
+          $ref: "#/components/schemas/CategoriaAjuda"
+        mensagem: { type: string }
+        status:
+          $ref: "#/components/schemas/CandidaturaStatus"
+        createdAt: { type: string, format: date-time }
+        updatedAt: { type: string, format: date-time }
+
+    DenunciaCreate:
+      type: object
+      required: [motivo]
+      properties:
+        motivo:
+          type: string
+          enum: [spam, ofensivo, fora_do_tema, outro]
+        detalhe: { type: string }
+
+    Denuncia:
+      type: object
+      required: [id, demandaId, motivo, createdAt]
+      properties:
+        id: { type: string }
+        demandaId: { type: string }
+        motivo: { type: string }
+        createdAt: { type: string, format: date-time }
+
+    Notificacao:
+      type: object
+      required: [id, tipo, alvoId, lida, createdAt]
+      properties:
+        id: { type: string }
+        tipo:
+          type: string
+          enum:
+            - candidatura_nova
+            - candidatura_aceita
+            - candidatura_recusada
+            - demanda_status
+        alvoId: { type: string }
+        lida: { type: boolean }
+        createdAt: { type: string, format: date-time }
+
+    NotificacaoList:
+      type: object
+      required: [items, paging]
+      properties:
+        items:
+          type: array
+          items:
+            $ref: "#/components/schemas/Notificacao"
+        paging:
+          $ref: "#/components/schemas/Paging"
+
+    ErrorEnvelope:
+      type: object
+      required: [error]
+      properties:
+        error:
+          type: object
+          required: [code, message]
+          properties:
+            code:
+              type: string
+              enum:
+                - VALIDATION_ERROR
+                - UNAUTHORIZED
+                - FORBIDDEN
+                - NOT_FOUND
+                - CONFLICT
+                - SERVER_ERROR
+            message: { type: string }
+            fields:
+              type: object
+              additionalProperties: { type: string }

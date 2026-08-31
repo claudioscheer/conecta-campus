@@ -1,0 +1,19 @@
+{
+  "items": [
+    {
+      "id": "d_01",
+      "titulo": "Sensores na estufa do bloco B",
+      "area": "Agronomia",
+      "habilidades": ["TI", "Sensores"],
+      "preview": "Precisamos ligar umidade do solo a um painel no celular.",
+      "status": "aberta",
+      "autorNome": "Ana Souza",
+      "autorPapel": "professor",
+      "createdAt": "2026-08-20T14:00:00Z"
+    }
+  ],
+  "paging": {
+    "nextCursor": "d_01",
+    "hasMore": true
+  }
+}

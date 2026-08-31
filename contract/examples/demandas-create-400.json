@@ -1,0 +1,10 @@
+{
+  "error": {
+    "code": "VALIDATION_ERROR",
+    "message": "Corrija os campos destacados.",
+    "fields": {
+      "titulo": "obrigatório",
+      "problema": "mínimo 40 caracteres"
+    }
+  }
+}
