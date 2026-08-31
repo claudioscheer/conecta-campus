@@ -12,12 +12,12 @@ Estilos no código: `app/theme/tokens.ts` (ainda a criar). Hex e espaço vivem l
 
 Campus, papel, calmo. Não é fintech neon, não é card SaaS com sombra grande.
 
-Referências para olhar (não copiar pixel a pixel):
+Referências (gratuitas, não copiar pixel a pixel):
 
-- [Mobbin](https://mobbin.com): telas reais de app, fluxo de feed e form
-- [Refero](https://refero.design): padrões de UI (lista, vazio, erro)
-- [Get Designs](https://www.getdesigns.ai): mood e direção visual
-- Material e Human Interface só para gesto e área de toque, não para colar o visual do iOS/Android
+- [Refero](https://refero.design): padrões de UI (lista, busca, vazio, erro)
+- [getdesign.md](https://getdesign.md/): catálogo de arquivos DESIGN.md para o agente
+- [Screenlane](https://screenlane.com): screenshots de app, filtro por tipo de tela
+- Material e Human Interface: área de toque e gesto, não a paleta
 
 ---
 
