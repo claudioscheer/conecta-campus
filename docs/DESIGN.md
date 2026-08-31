@@ -16,7 +16,7 @@ Referências (gratuitas, não copiar pixel a pixel):
 
 - [Refero](https://refero.design): padrões de UI (lista, busca, vazio, erro)
 - [getdesign.md](https://getdesign.md/): catálogo de arquivos DESIGN.md para o agente
-- [Screenlane](https://screenlane.com): screenshots de app, filtro por tipo de tela
+- [Page Flows](https://pageflows.com/): fluxos reais de app (onboarding, feed, form)
 - Material e Human Interface: área de toque e gesto, não a paleta
 
 ---
