@@ -1,12 +1,8 @@
 # Conecta Campus · SPEC.md (V1)
 
-Documento oficial da primeira versão. Nasce da oficina da Aula 3: a turma (stakeholders e futuros usuários) respondeu como o app deve funcionar no campus. Este arquivo **congela** essas decisões para humanos e para agentes.
+O que o produto faz: requisitos funcionais (Given / When / Then), estados de tela e requisitos não funcionais.
 
-Este arquivo descreve **só a V1**. O que não entra nesta versão vive em [`FORA-DE-ESCOPO.md`](./FORA-DE-ESCOPO.md), não aqui.
-
-Catálogo da oficina: [`REQUISITOS-FUNCIONAIS.md`](./REQUISITOS-FUNCIONAIS.md), [`REQUISITOS-NAO-FUNCIONAIS.md`](./REQUISITOS-NAO-FUNCIONAIS.md). Norte do produto: [`PROJECT.md`](./PROJECT.md).
-
-**Contrato HTTP:** [`../contract/openapi.yaml`](../contract/openapi.yaml).
+Visual: [`../DESIGN.md`](../DESIGN.md). HTTP: [`../contract/openapi.yaml`](../contract/openapi.yaml).
 
 Se este SPEC e o OpenAPI discordarem, **o OpenAPI ganha em path/JSON/código HTTP**. Este SPEC ganha em comportamento de produto. Corrija o perdedor no mesmo commit.
 
@@ -431,8 +427,6 @@ Cópia de exemplo (pode ir para o app):
 
 ## 4. Requisitos não funcionais
 
-Detalhe e como verificar: [`REQUISITOS-NAO-FUNCIONAIS.md`](./REQUISITOS-NAO-FUNCIONAIS.md).
-
 | ID | Regra | Como saber que passou |
 | --- | --- | --- |
 | **RNF-01** | Servidor é a fonte da verdade: id, timestamps, status, papéis, contagem. | Cliente não inventa `id` oficial nem “aceita” localmente para valer. |
@@ -626,4 +620,4 @@ Ferramenta: script de k6 ou coleção HTTP contra o mock; depois contra o LARK. 
 6. Wi-Fi cai: cache ou rascunho, nunca tela branca.
 7. Chat, push e upload **não** existem.
 
-Se um agente entregar o que está em [`FORA-DE-ESCOPO.md`](./FORA-DE-ESCOPO.md), a V1 não está pronta: está fora do combinado.
+Se um agente entregar chat, push, upload ou qualquer tela que este arquivo não descreva, o trabalho está fora do combinado.

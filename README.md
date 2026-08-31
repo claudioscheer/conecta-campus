@@ -9,7 +9,7 @@ Repositório: [github.com/claudioscheer/conecta-campus](https://github.com/claud
 | Arquivo | Para quê |
 | --- | --- |
 | [docs/SPEC.md](./docs/SPEC.md) | O que o produto faz |
-| [docs/DESIGN.md](./docs/DESIGN.md) | Cor, tipo, botão, onde mora o estilo |
+| [DESIGN.md](./DESIGN.md) | Visual: cores, tipo, botões |
 | [contract/openapi.yaml](./contract/openapi.yaml) | Paths, JSON, erros |
 | [AGENTS.md](./AGENTS.md) | Instruções para qualquer agente (Codex, Cursor, Copilot) |
 | [CLAUDE.md](./CLAUDE.md) | Ponte para o Claude Code (`@AGENTS.md`) |
@@ -27,6 +27,7 @@ O agente lê `AGENTS.md` sozinho. No chat, cite o RF e o `operationId`:
 ```text
 Implemente RF-05 (feed) conforme docs/SPEC.md.
 Use só listDemandas no contract/openapi.yaml.
+Visual conforme DESIGN.md (tokens, um primário, raio 4).
 Card = DemandaCard. Sem problema completo.
 Estados: esqueleto, vazio, erro, offline com cache.
 Não crie path novo.

@@ -9,17 +9,22 @@ App da SETREM: demandas de pesquisa e TCC encontram quem tem a habilidade.
 - App: **React Native** via **Expo**.
 - Validação: **Zod** na API (body e query) e no app (formulário e resposta HTTP).
 
-## Pastas
+## Onde ler o quê
 
-| Pasta | Conteúdo |
+Estes dois ficam na **raiz**, ao lado deste arquivo. O SPEC fica em `docs/` sozinho.
+
+| Arquivo | Para quê |
 | --- | --- |
-| `docs/SPEC.md` | O que o produto faz |
-| `docs/DESIGN.md` | O que a tela parece (cor, tipo, botão) |
-| `contract/openapi.yaml` | Contrato HTTP (paths, JSON, erros) |
+| `AGENTS.md` | Como trabalhar neste repositório (este arquivo) |
+| `DESIGN.md` | Decisões visuais: paleta, tipo, espaço, botão, raio, tokens |
+| `docs/SPEC.md` | O que o produto faz (Given / When / Then, estados, RNF) |
+| `contract/openapi.yaml` | HTTP: paths, JSON, erros |
 | `api/` | Servidor Bun |
 | `app/` | Cliente Expo |
 
-Não compartilhe um pacote de tipos ou de Zod entre `api/` e `app/`. O OpenAPI é o contrato comum. Cada lado tem o próprio schema na borda: a API valida o que entra no servidor; o app valida o que o usuário digitou e o JSON que chegou.
+Não compartilhe um pacote de Zod entre `api/` e `app/`. O OpenAPI é o contrato comum.
+
+Não invente cor, tipo ou botão. Isso está em `DESIGN.md`. Hex e espaço no código: `app/theme/tokens.ts`.
 
 ## Comandos
 
@@ -31,11 +36,10 @@ Health: `GET http://localhost:3000/v1/health`
 
 ## Como escrever código
 
-- Tipar parâmetros, retorno e JSON. Se o tipo não existe no OpenAPI, não invente no código: mude o YAML primeiro.
-- Nomes e pastas iguais ao que já está no repo.
+- Tipar parâmetros, retorno e JSON. Campo novo: primeiro o OpenAPI, depois o código.
 - Na API, parse com Zod antes de gravar.
 - No app: UI → estado → repositório. A tela não chama a rede.
-- Tela nova ou tela mudada: leia `docs/DESIGN.md`. Cores e espaço vêm de `app/theme/tokens.ts`, não de hex solto.
+- Qualquer tela: leia `DESIGN.md` antes de gerar UI.
 - Login: Google da conta SETREM. Rotas privadas exigem `Authorization: Bearer`.
 - Sem chat, push ou upload de arquivo.
 
@@ -43,6 +47,5 @@ Health: `GET http://localhost:3000/v1/health`
 
 1. `contract/openapi.yaml` (HTTP)
 2. `docs/SPEC.md` (comportamento)
-3. `docs/DESIGN.md` (aparência)
-4. `docs/FORA-DE-ESCOPO.md` (não fazer)
-5. este arquivo (pastas, stack, comandos)
+3. `DESIGN.md` (visual)
+4. este arquivo (pastas, stack, comandos)
