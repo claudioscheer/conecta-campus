@@ -15,7 +15,7 @@ Lista de paths, corpos JSON, códigos HTTP e exemplos. Não é o lugar de “por
 3. Ajuste a linha RF → `operationId` no SPEC se o comportamento mudou.
 4. Só então mude API e cliente.
 
-Não crie campo só no handler Next.js. O agente deve recusar PR que chama URL fora deste yaml.
+Não crie campo só no `Bun.serve`. O agente deve recusar PR que chama URL fora deste yaml.
 
 ## O que cada operação precisa ter
 

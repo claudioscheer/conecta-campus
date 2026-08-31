@@ -11,7 +11,7 @@ Repositório: [github.com/claudioscheer/conecta-campus](https://github.com/claud
 | [docs/SPEC.md](./docs/SPEC.md) | O que a V1 faz (Given / When / Then) |
 | [contract/openapi.yaml](./contract/openapi.yaml) | Paths, JSON, erros |
 | [AGENTS.md](./AGENTS.md) | Como um agente deve trabalhar aqui |
-| [api/](./api/) | API (Next.js + TypeScript) |
+| [api/](./api/) | API (Bun + TypeScript + Zod) |
 | [app/](./app/) | Aplicativo mobile (Expo + TypeScript) |
 
 A V1 ainda não tem código de servidor nem de app. Os documentos acima são o que o agente precisa para começar sem inventar produto.

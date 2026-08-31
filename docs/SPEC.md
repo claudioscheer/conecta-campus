@@ -2,21 +2,23 @@
 
 Documento oficial da primeira versão. Nasce da oficina da Aula 3: a turma (stakeholders e futuros usuários) respondeu como o app deve funcionar no campus. Este arquivo **congela** essas decisões para humanos e para agentes.
 
-Oficina bruta: [`REQUISITOS-FUNCIONAIS.md`](./REQUISITOS-FUNCIONAIS.md), [`REQUISITOS-NAO-FUNCIONAIS.md`](./REQUISITOS-NAO-FUNCIONAIS.md), [`FORA-DE-ESCOPO.md`](./FORA-DE-ESCOPO.md). Norte do produto: [`PROJECT.md`](./PROJECT.md).
+Este arquivo descreve **só a V1**. O que não entra nesta versão vive em [`FORA-DE-ESCOPO.md`](./FORA-DE-ESCOPO.md), não aqui.
 
-**Contrato HTTP (fonte da verdade de paths e JSON):** [`../contract/openapi.yaml`](../contract/openapi.yaml).
+Catálogo da oficina: [`REQUISITOS-FUNCIONAIS.md`](./REQUISITOS-FUNCIONAIS.md), [`REQUISITOS-NAO-FUNCIONAIS.md`](./REQUISITOS-NAO-FUNCIONAIS.md). Norte do produto: [`PROJECT.md`](./PROJECT.md).
 
-Se este SPEC e o OpenAPI discordarem, **o OpenAPI ganha em path/JSON/código HTTP**. Este SPEC ganha em comportamento de produto e cortes da V1. Corrija o perdedor no mesmo commit.
+**Contrato HTTP:** [`../contract/openapi.yaml`](../contract/openapi.yaml).
+
+Se este SPEC e o OpenAPI discordarem, **o OpenAPI ganha em path/JSON/código HTTP**. Este SPEC ganha em comportamento de produto. Corrija o perdedor no mesmo commit.
 
 ---
 
 ## Como usar este documento (humano e agente)
 
-1. Leia o **loop da V1** e o **fora de escopo** antes de escrever código.
-2. Cada requisito funcional tem **Given / When / Then**, a **operação OpenAPI** e os **estados de tela**. Isso é o formato do RF no markdown. Não é Cucumber, não é arquivo de teste.
+1. Leia o **loop da V1**. Só implemente o que está neste arquivo e no OpenAPI.
+2. Cada requisito funcional tem **Given / When / Then**, a **operação OpenAPI** e os **estados de tela**.
 3. Não invente campo, path ou status que não existam no OpenAPI.
-4. Não implemente item da seção 5 (fora de escopo) “para completar”.
-5. No `AGENTS.md` do repositório de código, aponte para este arquivo e para o OpenAPI. Prompt curto: “implemente RF-13 conforme SPEC.md e `postCandidatura` no OpenAPI”.
+4. Requisitos não funcionais (seção 4) fazem parte deste SPEC.
+5. Prompt curto: “implemente RF-13 conforme docs/SPEC.md e `postCandidatura` no OpenAPI”.
 
 **Vocabulário da V1:** **demanda** (não “post” genérico). **Candidatura** (não chat). **Responsável** = quem publicou.
 
@@ -50,7 +52,7 @@ Uso rápido no corredor e no laboratório, Wi-Fi do campus oscilando, 4G fraco. 
 
 ## 2. Requisitos funcionais (V1)
 
-Isto **é** Given / When / Then. Cada RF abaixo tem essas três linhas no markdown. Não existe arquivo Cucumber neste repositório. As frases estão em português. Os rótulos estão em inglês de propósito (Fowler, BDD, o agente).
+Cada RF abaixo tem **Given / When / Then** (rótulos em inglês, frases em português). Isso é o requisito.
 
 ```text
 ID · nome curto
@@ -66,16 +68,42 @@ Estados: se a tela tiver lista ou envio
 
 ### 2.1 Autenticação e papéis
 
-**RF-01 · Login institucional**
+**RF-01 · Login com a conta Google da SETREM**
 
-Só a comunidade da SETREM entra. Sem conta institucional não há feed, publicação nem candidatura.
+A V1 entra com **Google Sign-In**. A conta tem de ser a do campus (Workspace da SETREM, e-mail institucional, hoje `@setrem.com.br`). Gmail pessoal não entra.
 
-Given: pessoa informa e-mail (domínio institucional vigente, hoje `@setrem.com.br`).  
-When: pede para entrar (e-mail + código de uso único, ou o fluxo equivalente que o servidor aceitar na V1).  
-Then: recebe sessão (`token`) e o perfil em `getMe`. E-mail de Gmail, Hotmail ou outro domínio é recusado.
+Fluxo:
 
-Regras: o cliente não “libera o app” sem token. O domínio vale o que o servidor lista, não um regex só no celular.  
-Falhas: 400 e-mail malformado; 401 código errado ou expirado. Mensagem: “Use o e-mail institucional da SETREM.”  
+```text
+1. No app, a pessoa toca “Entrar com Google”
+2. O SDK do Google devolve um idToken
+3. O app manda POST /v1/auth { "idToken": "..." }
+4. O servidor valida o token no Google
+5. Se o e-mail não for do domínio SETREM → 403, sem sessão
+6. Se for → cria ou encontra o usuário, devolve token do Conecta Campus
+7. O app guarda o token e chama GET /v1/me
+```
+
+Rotas **públicas** (sem Bearer): `GET /v1/health`, `POST /v1/auth`.  
+Todo o resto: **401** se faltar token, se estiver expirado ou se for inválido.
+
+When o servidor **bloqueia**:
+
+| Caso | HTTP |
+| --- | --- |
+| Sem `Authorization: Bearer` nas rotas privadas | 401 |
+| Token expirado ou assinado errado | 401 |
+| `idToken` do Google inválido | 401 |
+| E-mail Google fora do domínio SETREM | 403 |
+| Papel insuficiente (ex.: aluno em `ocultar`) | 403 |
+| Demanda ocultada para quem não é moderador | 404 |
+
+Given: pessoa com conta Google do campus.  
+When: completa o Sign-In e o app envia o `idToken`.  
+Then: recebe `token` do Conecta Campus e o `usuario` (id, nome, email, papel).
+
+Regras: o cliente não “libera o app” sem token. O domínio vale o que o **servidor** lista, não um filtro só no celular. O papel vem do servidor (RF-02), não do Google.  
+Falhas: 401 token Google ruim; 403 “Use a conta Google da SETREM.”  
 API: `postAuth` · `getMe`
 
 **RF-02 · Papéis no token**
@@ -418,36 +446,19 @@ Detalhe e como verificar: [`REQUISITOS-NAO-FUNCIONAIS.md`](./REQUISITOS-NAO-FUNC
 | **RNF-09** | API `/v1`. App antigo não quebra por path novo. | Prefixos versionados. |
 | **RNF-10** | Feed paginado (`after`, `limit` 20, máx. 50). Card ≠ detalhe. | Card sem `problema` completo. |
 | **RNF-11** | p95 `listDemandas` e `getDemanda` abaixo de **400 ms** no servidor (sem a rede do celular). | Medir no mock e no LARK. |
-| **RNF-12** | Banco **PostgreSQL**. | Ver seção 7. |
+| **RNF-12** | Banco **PostgreSQL**. | Ver seção 6. |
 | **RNF-13** | Sem mídia binária na V1. Capa futura: object store, no banco só URL. | Sem multipart nas rotas da V1. |
 | **RNF-14** | Eventos no banco: publicada, aceite, concluída, `lastActivityAt`. Sem dashboard. | Colunas existem mesmo sem tela de coordenação. |
 
 ---
 
-## 5. Fora de escopo (V1)
-
-Não fazer, mesmo se o agente “completar” parecer útil. Por quê e o que a V1 faz no lugar: [`FORA-DE-ESCOPO.md`](./FORA-DE-ESCOPO.md).
-
-- Chat interno, push, silenciar projeto, SMTP como único fluxo de apoio
-- Upload de imagem, galeria, PDF, vídeo, imagem de capa
-- Diário de bordo / timeline de progresso
-- Arquivamento automático por dias parado
-- Horas complementares / PDF / assinatura de professor
-- Gamificação, ranking, recomendação, urgente no topo
-- Painel de coordenação, vitrine de feira, laboratório físico
-- Detalhe secreto só para aceitos (o autor controla o que escreve)
-- SSO Workspace completo (V1: e-mail institucional + verificação simples)
-- Fila genérica de **todas** as escritas offline (V1: cache de leitura + rascunho de publicação)
-
----
-
-## 6. Contrato de API
+## 5. Contrato de API
 
 Arquivo: [`../contract/openapi.yaml`](../contract/openapi.yaml).
 
 Protocolo: **REST JSON**, iniciado pelo cliente. Sem GraphQL e sem WebSocket na V1.
 
-### 6.1 Mapa (tela → operação)
+### 5.1 Mapa (tela → operação)
 
 | Tela / ação | Método e path | operationId |
 | --- | --- | --- |
@@ -466,7 +477,45 @@ Protocolo: **REST JSON**, iniciado pelo cliente. Sem GraphQL e sem WebSocket na 
 | Sino | `GET /v1/notificacoes` | `listNotificacoes` |
 | Marcar lida | `PATCH /v1/notificacoes/{id}` | `patchNotificacao` |
 
-### 6.2 Por que estes campos
+### 5.2 Entrada e saída (resumo)
+
+Tudo autenticado com `Authorization: Bearer <token>`, exceto `getHealth` e `postAuth`.
+
+**POST /v1/auth** (`postAuth`)  
+Entrada: `{ "idToken": "<Google ID token>" }`  
+Saída 200: `{ "token": "<JWT do app>", "usuario": { id, nome, email, papel } }`  
+Falhas: 401 token Google inválido; 403 e-mail fora da SETREM.
+
+**GET /v1/me** (`getMe`)  
+Entrada: Bearer.  
+Saída 200: usuário da sessão. 401 sem sessão.
+
+**GET /v1/demandas** (`listDemandas`)  
+Entrada: query `q`, `area`, `habilidade`, `status`, `after`, `limit`.  
+Saída 200: `{ "items": [DemandaCard], "paging": { nextCursor, hasMore } }`. Card sem problema completo e sem contato.
+
+**GET /v1/demandas/{id}** (`getDemanda`)  
+Saída 200: `DemandaDetalhe`. `contato` só se a candidatura da sessão foi aceita. 404 se ocultada.
+
+**POST /v1/demandas** (`postDemanda`)  
+Entrada: header `Idempotency-Key`; body `titulo`, `area`, `problema`, `resultadoEsperado`, `habilidades[]`, `links[]?`.  
+Saída 201: detalhe, status `aberta`. 400 por campo.
+
+**PATCH /v1/demandas/{id}** (`patchDemanda`)  
+Entrada: `status` e/ou `resultadoUrl` (e campos editáveis). Só o responsável.  
+Saída 200: detalhe. 403 outro usuário. 409 transição inválida.
+
+**POST /v1/demandas/{id}/candidaturas** (`postCandidatura`)  
+Entrada: `Idempotency-Key`; `{ "categoria", "mensagem" }`.  
+Saída 201: candidatura `pendente`. 409 se já candidatou ou se a demanda não está `aberta`.
+
+**PATCH /v1/demandas/{id}/candidaturas/{cid}** (`patchCandidatura`)  
+Entrada: `{ "status": "aceita" | "recusada" | "cancelada" }`.  
+Saída 200: candidatura. 403 se não for o responsável (aceite/recusa) nem o candidato (cancelar).
+
+JSON completo: [`../contract/openapi.yaml`](../contract/openapi.yaml). Exemplos: [`../contract/examples/`](../contract/examples/).
+
+### 5.3 Por que estes campos
 
 | Campo | Onde | Por quê |
 | --- | --- | --- |
@@ -477,7 +526,7 @@ Protocolo: **REST JSON**, iniciado pelo cliente. Sem GraphQL e sem WebSocket na 
 | `Idempotency-Key` | POST | Retry no celular não duplica |
 | `lastActivityAt` | demanda | Habilita arquivo automático depois, sem migração |
 
-### 6.3 Erro padrão (todo 4xx/5xx)
+### 5.4 Erro padrão (todo 4xx/5xx)
 
 ```json
 {
@@ -491,7 +540,7 @@ Protocolo: **REST JSON**, iniciado pelo cliente. Sem GraphQL e sem WebSocket na 
 
 O app mapeia `code` + HTTP para a tabela da seção 3. Nunca mostra o JSON cru.
 
-### 6.4 Como mudar o contrato
+### 5.5 Como mudar o contrato
 
 1. Editar `contract/openapi.yaml` e um exemplo em `contract/examples/`.
 2. Ajustar API.
@@ -500,9 +549,9 @@ O app mapeia `code` + HTTP para a tabela da seção 3. Nunca mostra o JSON cru.
 
 ---
 
-## 7. Dados e arquitetura
+## 6. Dados e arquitetura
 
-### 7.1 Por que SQL (PostgreSQL), não documento
+### 6.1 Por que SQL (PostgreSQL), não documento
 
 A V1 é **relacional**: usuário tem muitas demandas; demanda tem muitas candidaturas; **uma candidatura por par (usuário, demanda)**; transições de status precisam de transação (aceitar + liberar contato + notificar).
 
@@ -515,7 +564,7 @@ A V1 é **relacional**: usuário tem muitas demandas; demanda tem muitas candida
 
 **Escolha V1: PostgreSQL.** Documento só faria sentido se o payload fosse livre e sem joins. Aqui não é.
 
-### 7.2 Tabelas
+### 6.2 Tabelas
 
 ```text
 usuarios          id, nome, email, papel, curso, semestre, created_at
@@ -534,7 +583,7 @@ idempotency_keys  key, usuario_id, operation, resource_id, created_at
 
 O banco **não** guarda bytes de imagem. Só URL, se um dia existir capa.
 
-### 7.3 Camadas no cliente (Aula 4 em diante)
+### 6.3 Camadas no cliente (Aula 4 em diante)
 
 ```text
 UI  →  state holder  →  repository  →  cache local
@@ -543,13 +592,13 @@ UI  →  state holder  →  repository  →  cache local
 
 A tela não chama `fetch`. O servidor dono de id, status e papel.
 
-### 7.4 Imagens (decisão explícita)
+### 6.4 Imagens (decisão explícita)
 
 A oficina dividiu voto em foto de capa. **V1: sem binário.** Evidência = link.
 
 Se a V1.1 adicionar uma capa: comprimir no cliente, enviar a um **object store**, gravar só `capaUrl` na demanda. Postgres não é disco de foto. 4G e custo no LARK são o motivo do corte.
 
-### 7.5 Como testar se a API está boa o bastante
+### 6.5 Como testar se a API está boa o bastante
 
 Não é “sentir que está rápido”. Medir:
 
@@ -567,7 +616,7 @@ Ferramenta: script de k6 ou coleção HTTP contra o mock; depois contra o LARK. 
 
 ---
 
-## 8. Critério de pronto da V1
+## 7. Critério de pronto da V1
 
 1. Aluno ou professor entra com e-mail institucional.
 2. Publica uma demanda válida (ou vê 400 por campo).
@@ -577,4 +626,4 @@ Ferramenta: script de k6 ou coleção HTTP contra o mock; depois contra o LARK. 
 6. Wi-Fi cai: cache ou rascunho, nunca tela branca.
 7. Chat, push e upload **não** existem.
 
-Se um agente entregar qualquer item da seção 5, a V1 não está pronta: está fora do combinado.
+Se um agente entregar o que está em [`FORA-DE-ESCOPO.md`](./FORA-DE-ESCOPO.md), a V1 não está pronta: está fora do combinado.

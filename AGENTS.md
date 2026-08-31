@@ -9,9 +9,10 @@ Instruções para humanos e agentes que implementam este repositório.
 ## Se os documentos discordarem
 
 1. `contract/openapi.yaml` ganha em path, JSON e código HTTP.
-2. `docs/SPEC.md` ganha em comportamento e no que a V1 corta.
-3. Este `AGENTS.md` ganha em pastas e no passo a passo de mudança.
-4. `README.md` só explica como clonar e rodar.
+2. `docs/SPEC.md` ganha em comportamento da V1.
+3. `docs/FORA-DE-ESCOPO.md` diz o que **não** implementar.
+4. Este `AGENTS.md` ganha em pastas e no passo a passo de mudança.
+5. `README.md` só explica como clonar e rodar.
 
 Corrija o perdedor no mesmo commit.
 
@@ -24,13 +25,15 @@ conecta-campus/
   AGENTS.md              ← este arquivo
   docs/SPEC.md           ← requisitos (Given / When / Then)
   contract/openapi.yaml  ← contrato HTTP
-  api/                   ← Next.js + TypeScript (servidor)
+  api/                   ← Bun + TypeScript (servidor)
   app/                   ← React Native (Expo) + TypeScript
 ```
 
+- `api/` usa **Bun** (`Bun.serve`) e **Zod** para validar body/query. Sem Next.js, sem Express.
 - `api/` implementa o OpenAPI. Não inventa path.
 - `app/` consome o OpenAPI. A tela não chama a rede sozinha.
 - Camadas no app: UI → estado → repositório → cache local e cliente HTTP.
+- Login: Google Sign-In da conta SETREM. Sem Bearer nas rotas privadas → 401. E-mail fora do domínio → 403.
 
 ---
 

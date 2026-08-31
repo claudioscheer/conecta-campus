@@ -1,0 +1,11 @@
+{
+  "token": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.example",
+  "usuario": {
+    "id": "u_01",
+    "nome": "Ana Souza",
+    "email": "ana.souza@setrem.com.br",
+    "papel": "professor",
+    "curso": "Agronomia",
+    "semestre": "2026/1"
+  }
+}

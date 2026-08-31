@@ -12,9 +12,9 @@ Este arquivo é o **catálogo** do que a V1 faz, com regra e tela. O formato Giv
 
 ## 1. Autenticação e papéis
 
-**RF-01 · Login institucional**  
-Só e-mail da SETREM. Sem isso a pessoa não publica e não se candidata. E-mail pessoal é recusa com mensagem clara, não um “cadastro aberto”.  
-Tela: formulário de entrada. Falha: “Use o e-mail institucional da SETREM.”
+**RF-01 · Login com Google da SETREM**  
+No app: “Entrar com Google”. O servidor valida o `idToken`. Só e-mail do campus (`@setrem.com.br`). Gmail pessoal: 403. Sem Bearer nas outras rotas: 401.  
+Tela: botão Google. Falha: “Use a conta Google da SETREM.”
 
 **RF-02 · Papéis no servidor**  
 `aluno`, `professor`, `moderador`. Vêm no token. Não existe checkbox “sou moderador” no cadastro. Se o token não tiver papel, o app pede login de novo.

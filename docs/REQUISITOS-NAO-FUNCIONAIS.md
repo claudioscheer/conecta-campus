@@ -94,8 +94,8 @@ Sem HTTP claro. Sem prontuário, paciente ou dado de terceiros no payload. Pesqu
 **RNF-17 · Soft delete**  
 Ocultar guarda `hidden_at`. Se um dia houver exclusão de conta: anonimizar autoria, não apagar o histórico dos colaboradores. LGPD completa (exportar/apagar com fluxo jurídico) pode evoluir.
 
-**RNF-18 · Domínio SETREM**  
-Sem cadastro aberto. O domínio vigente é o que o servidor aceita.
+**RNF-18 · Google da SETREM**  
+Login só com Google Sign-In da conta institucional. Gmail pessoal: 403. Rotas privadas sem Bearer: 401. O domínio vale no **servidor**, depois de validar o `idToken` no Google.
 
 ---
 
