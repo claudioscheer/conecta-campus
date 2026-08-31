@@ -12,8 +12,8 @@ Repositório: [github.com/claudioscheer/conecta-campus](https://github.com/claud
 | [contract/openapi.yaml](./contract/openapi.yaml) | Paths, JSON, erros |
 | [AGENTS.md](./AGENTS.md) | Instruções para qualquer agente (Codex, Cursor, Copilot) |
 | [CLAUDE.md](./CLAUDE.md) | Ponte para o Claude Code (`@AGENTS.md`) |
-| [api/](./api/) | Servidor: Bun + Zod |
-| [app/](./app/) | Mobile: Expo + TypeScript |
+| [api/](./api/) | Servidor: Bun + TypeScript + Zod |
+| [app/](./app/) | Mobile: React Native (Expo) + TypeScript + Zod |
 
 ## Loop
 

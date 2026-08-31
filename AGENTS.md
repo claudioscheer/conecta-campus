@@ -2,14 +2,23 @@
 
 App da SETREM: demandas de pesquisa e TCC encontram quem tem a habilidade.
 
+## Stack
+
+- Linguagem: **TypeScript** em todo o repositório. Sem JavaScript solto. Sem `any`.
+- API: **Bun** (`Bun.serve`). Sem Next.js, sem Express.
+- App: **React Native** via **Expo**.
+- Validação: **Zod** na API (body e query) e no app (formulário e resposta HTTP).
+
 ## Pastas
 
 | Pasta | Conteúdo |
 | --- | --- |
 | `docs/SPEC.md` | O que o produto faz |
-| `contract/openapi.yaml` | HTTP: paths, JSON, erros |
-| `api/` | Servidor. Bun, `Bun.serve`, Zod |
-| `app/` | Mobile. Expo, TypeScript |
+| `contract/openapi.yaml` | Contrato HTTP (paths, JSON, erros) |
+| `api/` | Servidor Bun |
+| `app/` | Cliente Expo |
+
+Não compartilhe um pacote de tipos ou de Zod entre `api/` e `app/`. O OpenAPI é o contrato comum. Cada lado tem o próprio schema na borda: a API valida o que entra no servidor; o app valida o que o usuário digitou e o JSON que chegou.
 
 ## Comandos
 
@@ -19,9 +28,11 @@ cd api && bun install && bun --watch src/index.ts
 
 Health: `GET http://localhost:3000/v1/health`
 
-## Regras
+## Como escrever código
 
-- Não crie path, campo ou status fora do OpenAPI.
+- Tipar parâmetros, retorno e JSON. Se o tipo não existe no OpenAPI, não invente no código: mude o YAML primeiro.
+- Nomes e pastas iguais ao que já está no repo.
+- Na API, parse com Zod antes de gravar.
 - No app: UI → estado → repositório. A tela não chama a rede.
 - Login: Google da conta SETREM. Rotas privadas exigem `Authorization: Bearer`.
 - Sem chat, push ou upload de arquivo.
@@ -31,4 +42,4 @@ Health: `GET http://localhost:3000/v1/health`
 1. `contract/openapi.yaml` (HTTP)
 2. `docs/SPEC.md` (comportamento)
 3. `docs/FORA-DE-ESCOPO.md` (não fazer)
-4. este arquivo (pastas e comandos)
+4. este arquivo (pastas, stack, comandos)
