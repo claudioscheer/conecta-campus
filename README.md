@@ -9,6 +9,7 @@ Repositório: [github.com/claudioscheer/conecta-campus](https://github.com/claud
 | Arquivo | Para quê |
 | --- | --- |
 | [docs/SPEC.md](./docs/SPEC.md) | O que o produto faz |
+| [docs/DESIGN.md](./docs/DESIGN.md) | Cor, tipo, botão, onde mora o estilo |
 | [contract/openapi.yaml](./contract/openapi.yaml) | Paths, JSON, erros |
 | [AGENTS.md](./AGENTS.md) | Instruções para qualquer agente (Codex, Cursor, Copilot) |
 | [CLAUDE.md](./CLAUDE.md) | Ponte para o Claude Code (`@AGENTS.md`) |

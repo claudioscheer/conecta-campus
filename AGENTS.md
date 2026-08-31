@@ -14,6 +14,7 @@ App da SETREM: demandas de pesquisa e TCC encontram quem tem a habilidade.
 | Pasta | Conteúdo |
 | --- | --- |
 | `docs/SPEC.md` | O que o produto faz |
+| `docs/DESIGN.md` | O que a tela parece (cor, tipo, botão) |
 | `contract/openapi.yaml` | Contrato HTTP (paths, JSON, erros) |
 | `api/` | Servidor Bun |
 | `app/` | Cliente Expo |
@@ -34,6 +35,7 @@ Health: `GET http://localhost:3000/v1/health`
 - Nomes e pastas iguais ao que já está no repo.
 - Na API, parse com Zod antes de gravar.
 - No app: UI → estado → repositório. A tela não chama a rede.
+- Tela nova ou tela mudada: leia `docs/DESIGN.md`. Cores e espaço vêm de `app/theme/tokens.ts`, não de hex solto.
 - Login: Google da conta SETREM. Rotas privadas exigem `Authorization: Bearer`.
 - Sem chat, push ou upload de arquivo.
 
@@ -41,5 +43,6 @@ Health: `GET http://localhost:3000/v1/health`
 
 1. `contract/openapi.yaml` (HTTP)
 2. `docs/SPEC.md` (comportamento)
-3. `docs/FORA-DE-ESCOPO.md` (não fazer)
-4. este arquivo (pastas, stack, comandos)
+3. `docs/DESIGN.md` (aparência)
+4. `docs/FORA-DE-ESCOPO.md` (não fazer)
+5. este arquivo (pastas, stack, comandos)
