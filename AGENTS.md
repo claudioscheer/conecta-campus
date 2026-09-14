@@ -46,6 +46,8 @@ Postgres local (Docker na raiz). Sem Cloud SQL, sem site, sem Firebase.
 
 Banco: **Drizzle** + `drizzle-kit` (não Prisma). Schema TypeScript em `api/db/schema.ts`. Migration gerada: `bun run db:generate`. Aplicar: `bun run db:migrate`. Não edite SQL já aplicado: mude o schema e gere a próxima. Tabelas não nascem no `index.ts`. Queries da API usam o client Drizzle, não SQL solto no handler.
 
+Organização da API: o `api/src/index.ts` apenas inicializa o servidor (`Bun.serve`) e delega a requisição. O registro e matching das rotas fica em `api/src/routes.ts`, e a lógica de cada endpoint fica isolada em arquivos próprios dentro de `api/src/handlers/`.
+
 Rotas públicas: `GET /v1/health`, `POST /v1/auth`. O resto exige `Authorization: Bearer`.
 
 `POST /v1/auth`: body `{ idToken }` (JWT **do Google**, não a string `dev`). A API chama `verifyIdToken` (audience = `GOOGLE_CLIENT_ID`). E-mail / `hd` em `GOOGLE_ALLOWED_HOSTED_DOMAINS` (`setrem.com.br`). 401 token ruim. 403 domínio outro. Upsert `usuarios` por `google_sub`. Papel sai da nossa tabela, não do Google. Resposta: `{ token, usuario }` (JWT nosso). Sem `AUTH_DEV`. Sem idToken fake.
