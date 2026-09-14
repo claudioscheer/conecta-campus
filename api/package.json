@@ -4,9 +4,19 @@
   "type": "module",
   "scripts": {
     "dev": "bun --watch src/index.ts",
-    "start": "bun src/index.ts"
+    "start": "bun src/index.ts",
+    "db:generate": "drizzle-kit generate",
+    "db:migrate": "bun run db/migrate.ts",
+    "db:ping": "bun run db/ping.ts",
+    "test": "bun test"
   },
   "dependencies": {
+    "drizzle-kit": "^0.31.10",
+    "drizzle-orm": "^0.45.2",
+    "postgres": "^3.4.9",
     "zod": "^3.24.2"
+  },
+  "devDependencies": {
+    "@types/bun": "^1.4.2"
   }
 }

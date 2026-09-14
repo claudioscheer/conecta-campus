@@ -1,12 +1,28 @@
+import { sql } from "drizzle-orm";
+import { db } from "../db";
+
 const PORT = Number(process.env.PORT ?? 3000);
 
 const server = Bun.serve({
   port: PORT,
-  fetch(req) {
+  async fetch(req) {
     const url = new URL(req.url);
 
     if (req.method === "GET" && url.pathname === "/v1/health") {
-      return Response.json({ status: "ok" });
+      try {
+        await db.execute(sql`SELECT 1`);
+        return Response.json({ status: "ok" });
+      } catch (error) {
+        return Response.json(
+          {
+            error: {
+              code: "DATABASE_UNAVAILABLE",
+              message: "Não foi possível conectar ao banco de dados.",
+            },
+          },
+          { status: 503 },
+        );
+      }
     }
 
     return Response.json(
