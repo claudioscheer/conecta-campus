@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Conecta Campus · Dev Login</title>
+  <title>Conecta Campus · Dev Login & Teste de Autenticação</title>
   <style>
     * {
       box-sizing: border-box;
@@ -25,7 +25,7 @@
       background: #ffffff;
       border-radius: 12px;
       box-shadow: 0 4px 12px rgba(0, 0, 0, 0.08);
-      max-width: 600px;
+      max-width: 680px;
       width: 100%;
       padding: 32px;
     }
@@ -62,14 +62,31 @@
       border: 1px dashed #cbd5e1;
       border-radius: 8px;
     }
-    .result-section {
-      display: none;
+    .divider {
+      display: flex;
+      align-items: center;
+      text-align: center;
+      margin: 20px 0;
+      color: #94a3b8;
+      font-size: 12px;
+      font-weight: 600;
+      text-transform: uppercase;
+    }
+    .divider::before, .divider::after {
+      content: '';
+      flex: 1;
+      border-bottom: 1px solid #e2e8f0;
+    }
+    .divider:not(:empty)::before {
+      margin-right: 12px;
+    }
+    .divider:not(:empty)::after {
+      margin-left: 12px;
+    }
+    .section-block {
       margin-top: 24px;
       border-top: 1px solid #e2e8f0;
       padding-top: 20px;
-    }
-    .result-section.visible {
-      display: block;
     }
     label {
       display: block;
@@ -80,39 +97,56 @@
       text-transform: uppercase;
       letter-spacing: 0.05em;
     }
-    textarea {
+    textarea, input[type="text"] {
       width: 100%;
-      height: 140px;
       font-family: monospace;
       font-size: 12px;
       padding: 12px;
       border: 1px solid #cbd5e1;
       border-radius: 6px;
       background-color: #f8fafc;
-      resize: vertical;
       word-break: break-all;
+    }
+    textarea {
+      height: 110px;
+      resize: vertical;
     }
     .actions {
       margin-top: 12px;
       display: flex;
+      gap: 10px;
       justify-content: flex-end;
     }
-    button.btn-copy {
-      background-color: #2563eb;
+    button.btn {
       color: white;
       border: none;
-      padding: 10px 18px;
+      padding: 9px 16px;
       border-radius: 6px;
-      font-size: 14px;
+      font-size: 13px;
       font-weight: 600;
       cursor: pointer;
       transition: background-color 0.2s;
     }
-    button.btn-copy:hover {
-      background-color: #1d4ed8;
+    button.btn-primary {
+      background-color: #0284c7;
+    }
+    button.btn-primary:hover {
+      background-color: #0369a1;
+    }
+    button.btn-secondary {
+      background-color: #475569;
+    }
+    button.btn-secondary:hover {
+      background-color: #334155;
+    }
+    button.btn-success {
+      background-color: #16a34a;
+    }
+    button.btn-success:hover {
+      background-color: #15803d;
     }
     .payload-info {
-      margin-top: 16px;
+      margin-top: 14px;
       padding: 12px;
       background-color: #f1f5f9;
       border-radius: 6px;
@@ -125,11 +159,38 @@
     .payload-info strong {
       color: #0f172a;
     }
+    .response-card {
+      margin-top: 14px;
+      padding: 14px;
+      border-radius: 6px;
+      background: #0f172a;
+      color: #f8fafc;
+      font-family: monospace;
+      font-size: 12px;
+      overflow-x: auto;
+      white-space: pre-wrap;
+      word-break: break-all;
+      max-height: 220px;
+    }
+    .badge {
+      display: inline-block;
+      padding: 2px 8px;
+      border-radius: 4px;
+      font-weight: 600;
+      font-size: 12px;
+      margin-bottom: 8px;
+    }
+    .badge-200 { background-color: #dcfce7; color: #166534; }
+    .badge-400 { background-color: #fef3c7; color: #92400e; }
+    .badge-401 { background-color: #fee2e2; color: #991b1b; }
+    .badge-403 { background-color: #fee2e2; color: #991b1b; }
+    .badge-error { background-color: #fee2e2; color: #991b1b; }
   </style>
   <script>
     function parseJwt(token) {
       try {
         const base64Url = token.split('.')[1];
+        if (!base64Url) return null;
         const base64 = base64Url.replace(/-/g, '+').replace(/_/g, '/');
         const jsonPayload = decodeURIComponent(
           atob(base64)
@@ -143,21 +204,30 @@
       }
     }
 
-    function handleCredentialResponse(response) {
-      const idToken = response.credential;
-      const resultSection = document.getElementById("result-section");
-      const tokenInput = document.getElementById("id-token");
-      tokenInput.value = idToken;
-      resultSection.classList.add("visible");
-
+    function onTokenInputChange() {
+      const idToken = document.getElementById("id-token").value.trim();
+      const payloadBox = document.getElementById("payload-box");
+      if (!idToken) {
+        payloadBox.style.display = "none";
+        return;
+      }
       const payload = parseJwt(idToken);
       if (payload) {
         document.getElementById("user-name").textContent = payload.name || "N/A";
         document.getElementById("user-email").textContent = payload.email || "N/A";
         document.getElementById("user-hd").textContent = payload.hd || "N/A";
         document.getElementById("user-sub").textContent = payload.sub || "N/A";
-        document.getElementById("payload-box").style.display = "block";
+        payloadBox.style.display = "block";
+      } else {
+        payloadBox.style.display = "none";
       }
+    }
+
+    function handleCredentialResponse(response) {
+      const idToken = response.credential;
+      const tokenInput = document.getElementById("id-token");
+      tokenInput.value = idToken;
+      onTokenInputChange();
     }
 
     function copyToken() {
@@ -171,17 +241,90 @@
         }, 2000);
       });
     }
+
+    async function callAuth() {
+      const idToken = document.getElementById("id-token").value.trim();
+      const statusSpan = document.getElementById("auth-status");
+      const respBox = document.getElementById("auth-response");
+      const meTokenInput = document.getElementById("me-token");
+
+      if (!idToken) {
+        alert("Por favor, informe ou gere um Google ID Token primeiro.");
+        return;
+      }
+
+      statusSpan.textContent = "Chamando POST /v1/auth...";
+      statusSpan.className = "badge";
+      respBox.style.display = "none";
+
+      try {
+        const res = await fetch("/v1/auth", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ idToken }),
+        });
+
+        const data = await res.json();
+        statusSpan.textContent = `${res.status} ${res.statusText}`;
+        statusSpan.className = `badge badge-${res.status} visible`;
+        respBox.textContent = JSON.stringify(data, null, 2);
+        respBox.style.display = "block";
+
+        if (res.ok && data.token) {
+          meTokenInput.value = data.token;
+        }
+      } catch (err) {
+        statusSpan.textContent = "Erro na requisição";
+        statusSpan.className = "badge badge-error";
+        respBox.textContent = err.message;
+        respBox.style.display = "block";
+      }
+    }
+
+    async function callMe() {
+      const token = document.getElementById("me-token").value.trim();
+      const statusSpan = document.getElementById("me-status");
+      const respBox = document.getElementById("me-response");
+
+      if (!token) {
+        alert("Por favor, forneça o JWT do Conecta Campus no campo.");
+        return;
+      }
+
+      statusSpan.textContent = "Chamando GET /v1/me...";
+      statusSpan.className = "badge";
+      respBox.style.display = "none";
+
+      try {
+        const res = await fetch("/v1/me", {
+          method: "GET",
+          headers: {
+            "Authorization": `Bearer ${token}`
+          }
+        });
+
+        const data = await res.json();
+        statusSpan.textContent = `${res.status} ${res.statusText}`;
+        statusSpan.className = `badge badge-${res.status}`;
+        respBox.textContent = JSON.stringify(data, null, 2);
+        respBox.style.display = "block";
+      } catch (err) {
+        statusSpan.textContent = "Erro na requisição";
+        statusSpan.className = "badge badge-error";
+        respBox.textContent = err.message;
+        respBox.style.display = "block";
+      }
+    }
   </script>
   <script src="https://accounts.google.com/gsi/client" async defer></script>
 </head>
 <body>
   <div class="card">
     <h1>Conecta Campus · Dev Login</h1>
-    <p class="subtitle">Faça login com a conta Google para visualizar e copiar o ID Token.</p>
+    <p class="subtitle">Obtenha o Google ID Token e teste os endpoints <code>/v1/auth</code> e <code>/v1/me</code>.</p>
 
-    <!-- AVISO: Tela temporária de desenvolvimento que deve ser removida no futuro -->
     <div class="dev-banner">
-      ⚠️ <strong>Rota temporária de desenvolvimento:</strong> Esta tela é utilizada exclusivamente para testes locais e obtenção do ID Token real do Google, devendo ser removida no futuro antes do envio para produção.
+      ⚠️ <strong>Ambiente de Desenvolvimento:</strong> Utilize para obter ou colar o ID Token real do Google e validar a sessão localmente.
     </div>
 
     <!-- Google Sign-In Button -->
@@ -201,13 +344,16 @@
       </div>
     </div>
 
-    <!-- Result Section -->
-    <div id="result-section" class="result-section">
-      <label for="id-token">ID Token (Google JWT):</label>
-      <textarea id="id-token" readonly></textarea>
+    <div class="divider">ou informe manualmente</div>
+
+    <!-- Seção 1: ID Token e POST /v1/auth -->
+    <div class="section-block">
+      <label for="id-token">1. Google ID Token (Google JWT):</label>
+      <textarea id="id-token" placeholder="Cole aqui o idToken manualmente ou use o botão do Google acima..." oninput="onTokenInputChange()"></textarea>
 
       <div class="actions">
-        <button id="copy-btn" class="btn-copy" onclick="copyToken()">Copiar ID Token</button>
+        <button id="copy-btn" class="btn btn-secondary" onclick="copyToken()">Copiar ID Token</button>
+        <button id="auth-btn" class="btn btn-primary" onclick="callAuth()">Autenticar (POST /v1/auth)</button>
       </div>
 
       <div id="payload-box" class="payload-info" style="display: none;">
@@ -215,6 +361,26 @@
         <p><strong>E-mail:</strong> <span id="user-email"></span></p>
         <p><strong>Domínio (hd):</strong> <span id="user-hd"></span></p>
         <p><strong>Google Sub:</strong> <span id="user-sub"></span></p>
+      </div>
+
+      <div style="margin-top: 14px;">
+        <span id="auth-status" class="badge" style="display: none;"></span>
+        <pre id="auth-response" class="response-card" style="display: none;"></pre>
+      </div>
+    </div>
+
+    <!-- Seção 2: Conecta Campus Token e GET /v1/me -->
+    <div class="section-block">
+      <label for="me-token">2. Token Conecta Campus (Sessão Bearer):</label>
+      <textarea id="me-token" style="height: 70px;" placeholder="Preenchido automaticamente após o POST /v1/auth ou informe manualmente..."></textarea>
+
+      <div class="actions">
+        <button id="me-btn" class="btn btn-success" onclick="callMe()">Validar Sessão (GET /v1/me)</button>
+      </div>
+
+      <div style="margin-top: 14px;">
+        <span id="me-status" class="badge" style="display: none;"></span>
+        <pre id="me-response" class="response-card" style="display: none;"></pre>
       </div>
     </div>
   </div>
