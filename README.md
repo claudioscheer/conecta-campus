@@ -38,5 +38,9 @@ Ruim: “faz o feed”. O modelo inventa campo, chat e foto.
 ## API local
 
 ```bash
+docker compose up -d
+cp api/.env.example api/.env
 cd api && bun install && bun --watch src/index.ts
 ```
+
+Sem app Android ainda: abra `http://localhost:3000/dev/login` (conta Google SETREM), copie o `idToken` e mande em `POST /v1/auth`. Não use `idToken: "dev"`.

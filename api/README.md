@@ -18,4 +18,8 @@ bun install
 bun --watch src/index.ts
 ```
 
-Hoje o servidor só responde `GET /v1/health`. O agente completa as rotas do contrato, uma a uma, validando com Zod.
+Copie `.env.example` para `.env`. Suba o Postgres (`docker compose up -d` na raiz). Schema: `db/schema.ts` (Drizzle). `bun run db:generate` depois de mudar o schema; `bun run db:migrate` para aplicar. Depois o Bun.
+
+`GET http://localhost:3000/dev/login` é HTML local para obter um `idToken` real do Google (sem o app Android). Não é produto. Sem `AUTH_DEV`.
+
+Hoje o servidor só responde `GET /v1/health` até o agente implementar o contrato, uma rota por vez, com Zod.
