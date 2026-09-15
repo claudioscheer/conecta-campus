@@ -2,6 +2,7 @@ import { z } from "zod";
 import { eq } from "drizzle-orm";
 import { db } from "../../db";
 import { usuarios } from "../../db/schema";
+import { env } from "../env";
 import { errorResponse } from "../lib/errors";
 import { verifyGoogleIdToken } from "../lib/google-auth";
 import { signAppToken } from "../lib/jwt";
@@ -37,7 +38,7 @@ export async function handleAuth(req: Request): Promise<Response> {
     return errorResponse(401, "UNAUTHORIZED", "Token do Google inválido ou expirado.");
   }
 
-  const allowedDomains = (process.env.GOOGLE_ALLOWED_HOSTED_DOMAINS ?? "setrem.com.br")
+  const allowedDomains = env.GOOGLE_ALLOWED_HOSTED_DOMAINS
     .split(",")
     .map((d) => d.trim().toLowerCase())
     .filter(Boolean);

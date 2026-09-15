@@ -1,8 +1,8 @@
 import * as jose from "jose";
+import { env } from "../env";
 
 async function getSecretKey(): Promise<Uint8Array> {
-  const secret = process.env.JWT_SECRET || "conecta-campus-default-secret-key-safe";
-  const digest = await crypto.subtle.digest("SHA-256", new TextEncoder().encode(secret));
+  const digest = await crypto.subtle.digest("SHA-256", new TextEncoder().encode(env.JWT_SECRET));
   return new Uint8Array(digest);
 }
 

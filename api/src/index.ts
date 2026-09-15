@@ -1,9 +1,8 @@
 import { handleRequest } from "./routes";
-
-const PORT = Number(process.env.PORT ?? 3000);
+import { env } from "./env";
 
 const server = Bun.serve({
-  port: PORT,
+  port: env.PORT,
   fetch(req) {
     return handleRequest(req);
   },

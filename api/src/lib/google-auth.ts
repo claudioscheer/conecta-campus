@@ -1,4 +1,5 @@
 import { OAuth2Client } from "google-auth-library";
+import { env } from "../env";
 
 export interface GoogleUserPayload {
   sub: string;
@@ -10,7 +11,7 @@ export interface GoogleUserPayload {
 export type GoogleTokenVerifier = (idToken: string) => Promise<GoogleUserPayload>;
 
 const defaultVerifier: GoogleTokenVerifier = async (idToken: string) => {
-  const clientId = process.env.GOOGLE_CLIENT_ID ?? "";
+  const clientId = env.GOOGLE_CLIENT_ID;
   const client = new OAuth2Client(clientId);
   const ticket = await client.verifyIdToken({
     idToken,
