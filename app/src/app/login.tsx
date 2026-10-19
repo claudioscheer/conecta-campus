@@ -1,6 +1,8 @@
+import { useEffect } from "react";
 import { StyleSheet, Text, View } from "react-native";
 import { Redirect } from "expo-router";
 import { useAuth } from "@/session/AuthProvider";
+import { authLog } from "@/lib/logger";
 import { colors, spacing, type } from "@/theme/tokens";
 import { Banner } from "@/ui/Banner";
 import { Button } from "@/ui/Button";
@@ -9,11 +11,18 @@ export default function LoginScreen() {
   const { isSignedIn, isSigningIn, authError, signInWithGoogle, clearError } =
     useAuth();
 
+  useEffect(() => {
+    if (isSignedIn) {
+      authLog("ui", "login already signed in, redirecting to /");
+    }
+  }, [isSignedIn]);
+
   if (isSignedIn) {
     return <Redirect href="/" />;
   }
 
   const handlePress = () => {
+    authLog("ui", "login button pressed", { signingIn: isSigningIn });
     clearError();
     void signInWithGoogle();
   };

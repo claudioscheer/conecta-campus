@@ -2,6 +2,7 @@ import { useEffect } from "react";
 import { Stack } from "expo-router";
 import * as SplashScreen from "expo-splash-screen";
 import { AuthProvider, useAuth } from "@/session/AuthProvider";
+import { authLog } from "@/lib/logger";
 
 void SplashScreen.preventAutoHideAsync();
 
@@ -10,9 +11,10 @@ function RootNavigator() {
 
   useEffect(() => {
     if (isReady) {
+      authLog("boot", "hiding splash, routing", { signedIn: isSignedIn });
       void SplashScreen.hideAsync();
     }
-  }, [isReady]);
+  }, [isReady, isSignedIn]);
 
   if (!isReady) {
     return null;

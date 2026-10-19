@@ -1,4 +1,5 @@
 import { z } from "zod";
+import { authLog, describeToken } from "@/lib/logger";
 
 export const PapelSchema = z.enum(["aluno", "professor", "moderador"]);
 export type Papel = z.infer<typeof PapelSchema>;
@@ -87,6 +88,10 @@ export async function postAuth({
   idToken,
   fetchFn = fetch,
 }: PostAuthArgs): Promise<AuthResponse> {
+  authLog("api", "POST /auth start", {
+    baseUrl,
+    idTokenLen: idToken.length,
+  });
   let response: Response;
   try {
     response = await fetchFn(`${baseUrl}/auth`, {
@@ -95,6 +100,7 @@ export async function postAuth({
       body: JSON.stringify({ idToken }),
     });
   } catch {
+    authLog("api", "POST /auth network failed", { baseUrl });
     throw new AuthApiError({
       status: 0,
       code: "OFFLINE",
@@ -103,6 +109,10 @@ export async function postAuth({
   }
 
   const body = await parseJsonSafe(response);
+  authLog("api", "POST /auth response", {
+    status: response.status,
+    code: readErrorCode(body) ?? "none",
+  });
   if (!response.ok) {
     throw new AuthApiError({
       status: response.status,
@@ -113,12 +123,20 @@ export async function postAuth({
 
   const parsed = AuthResponseSchema.safeParse(body);
   if (!parsed.success) {
+    authLog("api", "POST /auth invalid body", {
+      issues: parsed.error.issues.length,
+    });
     throw new AuthApiError({
       status: response.status,
       code: "SERVER_ERROR",
       userMessage: "Resposta inválida do servidor. Tente de novo.",
     });
   }
+  authLog("api", "POST /auth success", {
+    token: describeToken(parsed.data.token),
+    email: parsed.data.usuario.email,
+    papel: parsed.data.usuario.papel,
+  });
   return parsed.data;
 }
 
@@ -133,12 +151,17 @@ export async function getMe({
   token,
   fetchFn = fetch,
 }: GetMeArgs): Promise<Usuario> {
+  authLog("api", "GET /me start", {
+    baseUrl,
+    token: describeToken(token),
+  });
   let response: Response;
   try {
     response = await fetchFn(`${baseUrl}/me`, {
       headers: { Authorization: `Bearer ${token}` },
     });
   } catch {
+    authLog("api", "GET /me network failed", { baseUrl });
     throw new AuthApiError({
       status: 0,
       code: "OFFLINE",
@@ -147,6 +170,10 @@ export async function getMe({
   }
 
   const body = await parseJsonSafe(response);
+  authLog("api", "GET /me response", {
+    status: response.status,
+    code: readErrorCode(body) ?? "none",
+  });
   if (!response.ok) {
     throw new AuthApiError({
       status: response.status,
@@ -161,11 +188,18 @@ export async function getMe({
   // RF-02: token sem papel válido equivale a 401 — pede login de novo.
   const parsed = UsuarioSchema.safeParse(body);
   if (!parsed.success) {
+    authLog("api", "GET /me invalid body, treating as 401", {
+      issues: parsed.error.issues.length,
+    });
     throw new AuthApiError({
       status: 401,
       code: "UNAUTHORIZED",
       userMessage: "Sessão inválida. Entre de novo.",
     });
   }
+  authLog("api", "GET /me success", {
+    email: parsed.data.email,
+    papel: parsed.data.papel,
+  });
   return parsed.data;
 }
