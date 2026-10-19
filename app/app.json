@@ -48,7 +48,7 @@
     ],
     "extra": {
       "apiBaseUrl": "http://localhost:3000/v1",
-      "googleWebClientId": "",
+      "googleWebClientId": "68331201188-bg40ubldrmaq7vv2abbmnk36l21an8jg.apps.googleusercontent.com",
       "googleIosClientId": ""
     },
     "experiments": {
