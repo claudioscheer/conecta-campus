@@ -2,6 +2,7 @@ import { handleHealth } from "./handlers/health";
 import { handleDevLogin } from "./handlers/dev-login";
 import { handleAuth } from "./handlers/auth";
 import { handleMe } from "./handlers/me";
+import { handleListDemandas } from "./handlers/demandas-list";
 
 type RouteHandler = (req: Request, url: URL) => Promise<Response> | Response;
 
@@ -26,6 +27,11 @@ const routes: Route[] = [
     method: "GET",
     match: (pathname) => pathname === "/v1/me",
     handler: (req) => handleMe(req),
+  },
+  {
+    method: "GET",
+    match: (pathname) => pathname === "/v1/demandas",
+    handler: (req, url) => handleListDemandas(req, url),
   },
   // Rota temporária de desenvolvimento
   {
