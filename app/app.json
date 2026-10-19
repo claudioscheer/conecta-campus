@@ -9,7 +9,10 @@
     "userInterfaceStyle": "automatic",
     "ios": {
       "icon": "./assets/expo.icon",
-      "bundleIdentifier": "br.edu.setrem.conectacampus"
+      "bundleIdentifier": "br.edu.setrem.conectacampus",
+      "config": {
+        "usesNonExemptEncryption": false
+      }
     },
     "android": {
       "package": "br.edu.setrem.conectacampus",
@@ -34,8 +37,20 @@
           "image": "./assets/images/splash-icon.png",
           "imageWidth": 76
         }
+      ],
+      [
+        "expo-secure-store",
+        {
+          "configureAndroidBackup": true,
+          "faceIDPermission": "Permitir que $(PRODUCT_NAME) acesse suas credenciais"
+        }
       ]
     ],
+    "extra": {
+      "apiBaseUrl": "http://localhost:3000/v1",
+      "googleWebClientId": "",
+      "googleIosClientId": ""
+    },
     "experiments": {
       "typedRoutes": true,
       "reactCompiler": true
