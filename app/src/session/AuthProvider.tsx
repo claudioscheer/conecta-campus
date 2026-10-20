@@ -5,6 +5,7 @@ import * as SecureStore from "expo-secure-store";
 import {
   GoogleSignin,
   isCancelledResponse,
+  isErrorWithCode,
   isSuccessResponse,
   statusCodes,
 } from "@react-native-google-signin/google-signin";
@@ -320,8 +321,36 @@ export function AuthProvider({ children }: { children: ReactNode }) {
         setAuthError(error.userMessage);
         return;
       }
+      if (isErrorWithCode(error)) {
+        authLog("google", "signIn threw native error", {
+          code: String(error.code),
+          message: error.message,
+        });
+        if (error.code === statusCodes.IN_PROGRESS) {
+          setAuthError("Login já em andamento. Aguarde.");
+          return;
+        }
+        if (error.code === statusCodes.PLAY_SERVICES_NOT_AVAILABLE) {
+          setAuthError("Google Play Services não disponível neste aparelho.");
+          return;
+        }
+        // Qualquer outro código nativo (ex.: DEVELOPER_ERROR / ApiException 10
+        // = SHA-1 ou clientId não conferem no Google Cloud): expõe o código.
+        setAuthError(`Google não liberou o login (${error.code}). Tente de novo.`);
+        return;
+      }
+      if (error instanceof Error) {
+        authLog("google", "signIn threw error", {
+          name: error.name,
+          message: error.message,
+        });
+        setAuthError(`Google não liberou o login (${error.name}). Tente de novo.`);
+        return;
+      }
+      authLog("google", "signIn threw unknown value", {
+        kind: typeof error,
+      });
       setAuthError("Algo deu errado. Tente de novo.");
-      authLog("session", "signIn failed with unexpected error");
     } finally {
       setIsSigningIn(false);
     }
