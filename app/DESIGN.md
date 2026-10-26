@@ -170,6 +170,12 @@ components:
     textColor: "{colors.danger}"
     typography: "{typography.body-sm}"
     padding: "{spacing.sm} {spacing.md}"
+  banner-feedback-error:
+    backgroundColor: "{colors.danger}"
+    textColor: "{colors.on-primary}"
+    typography: "{typography.body-sm}"
+    rounded: "{rounded.sm}"
+    padding: "{spacing.sm} {spacing.md}"
   empty-state:
     backgroundColor: "{colors.paper}"
     textColor: "{colors.muted}"
@@ -225,7 +231,7 @@ O Conecta Campus parece **papel de campus**. Tela cream ({colors.paper}), texto 
 
 Títulos de tela em serif (Georgia / Palatino / Iowan se o sistema tiver). Corpo e UI em sans do sistema. Botão, input e card usam `{rounded.sm}` (4px). Borda 1px `{colors.line}`. Sem blur, sem gradiente, sem glass.
 
-O SPEC diz o que a tela **faz**. Este arquivo diz o que ela **parece**. Hex e espaço no código: `app/theme/tokens.ts`. Se o hex aparecer no meio de um componente de tela, extraia.
+O SPEC diz o que a tela **faz**. Este arquivo diz o que ela **parece**. Hex e espaço no código: `app/src/theme/tokens.ts`. Se o hex aparecer no meio de um componente de tela, extraia.
 
 Cobertura V1: login Google SETREM, feed de demandas, publicar, candidatar, contato, status, estados vazio / loading / erro / offline.
 
@@ -347,6 +353,7 @@ Estados documentados: default, pressed, disabled, loading. Sem hover (é app tou
 
 **`button-primary`** — ação principal da tela. Uma por view.
 - Fundo `{colors.primary}`, texto `{colors.on-primary}`, `{typography.button-md}`, altura 44, padding `12px 16px`, `{rounded.sm}`.
+- Ícone opcional: 18x18, à esquerda do texto com gap `{spacing.xs}` (8px). Quando loading, ícone e texto somem para dar lugar ao spinner centralizado.
 - Pressed: `{colors.primary-deep}`.
 - Disabled: opacidade 0.4. Não mude a cor.
 - Loading: o texto some, indicador claro no lugar. Largura do botão não colapsa.
@@ -378,9 +385,16 @@ Estados documentados: default, pressed, disabled, loading. Sem hover (é app tou
 
 ### Banners and empty
 
+**Taxonomia de erros:**
+- **Erro de validação de formulário**: inline abaixo do campo (`text-input-error` + caption). Nunca use toast para campo individual.
+- **Erro de feedback / ação (toast)**: `banner-feedback-error`. Fundo sólido `{colors.danger}`, texto `{colors.on-primary}`, peso 500. Ícone de status à esquerda: círculo com 'x' (20px, branco). Botão de fechar à direita: 'x' (16px, hitSlop 8) que chama `clearError()`. Posicionado imediatamente acima do botão/ação que disparou o erro. Mensagem direta: `[O que houve] + [Ação recomendada]`.
+- **Erro de carregamento de seção**: `banner-error`. Fundo `{colors.danger-soft}`, texto `{colors.danger}`. Sem código HTTP. Ação: `button-secondary` “Tentar novamente”.
+
 **`banner-offline`** — faixa no topo. Fundo `{colors.primary-soft}`, texto `{colors.muted}`: “Sem conexão. Mostrando o que estava salvo.” Lista em cache continua embaixo. Não bloqueia a tela.
 
 **`banner-error`** — erro da **seção**. Fundo `{colors.danger-soft}`, texto `{colors.danger}`. Sem código HTTP. Ação: `button-secondary` “Tentar novamente”.
+
+**`banner-feedback-error`** — toast de erro de ação (ex.: login rejeitado). Fundo `{colors.danger}`, texto `{colors.on-primary}`, ícone de status e botão de fechar. Fica acima do botão de ação.
 
 **`empty-state`** — “Nenhuma demanda ainda.” + `button-primary` “Publicar a primeira”. Nunca tela em branco.
 
@@ -395,6 +409,7 @@ Estados documentados: default, pressed, disabled, loading. Sem hover (é app tou
 
 ### Chrome
 
+**`topographic-hero`** — cabeçalho editorial com arte topográfica SVG sobre `{colors.primary}` / `{colors.primary-deep}`. Divisor inferior em onda orgânica vazada em `{colors.paper}` para transição perfeita com o conteúdo. Telas com esse hero exigem `<StatusBar style="light" />`.
 **`top-bar`** — “Conecta Campus” em `{typography.screen-title}`. Fundo paper, borda inferior 1px `{colors.line}`, altura 56.
 **`list-screen`** — fundo paper, gutter 16.
 
@@ -463,17 +478,17 @@ App nativo. Sem breakpoint de marketing site.
 ## Code
 
 ```text
-app/theme/tokens.ts     colors, spacing, rounded, type
-app/ui/Button.tsx       variants: primary, secondary, danger
-app/ui/Card.tsx         card-demanda
-app/ui/Chip.tsx
-app/ui/Banner.tsx       offline, error
+app/src/theme/tokens.ts       colors, spacing, rounded, type
+app/src/ui/Button.tsx         variants: primary, secondary, danger, icon
+app/src/ui/Card.tsx           card-demanda
+app/src/ui/Chip.tsx
+app/src/ui/Banner.tsx         offline, error (section & feedback toast)
+app/src/ui/TopographicHero.tsx hero topográfico com curvas e divisor em onda
+app/src/ui/GoogleIcon.tsx     ícone vetorial Google
 ```
 
 ## Known Gaps
 
-- `tokens.ts` ainda não existe. Crie na primeira tela, copiando o YAML
 - Sem dark mode na V1
 - Sem tab bar documentada: V1 pode ser stack (login → feed → detalhe)
-- Sem ícone de marca desenhado. Wordmark “Conecta Campus” em serif basta
 - Motion: 150ms no press. Sem bounce
