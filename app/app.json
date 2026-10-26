@@ -47,7 +47,7 @@
       ]
     ],
     "extra": {
-      "apiBaseUrl": "http://192.168.2.8:3000/v1",
+      "apiBaseUrl": "http://192.168.1.4:3000/v1",
       "googleWebClientId": "68331201188-bg40ubldrmaq7vv2abbmnk36l21an8jg.apps.googleusercontent.com",
       "googleIosClientId": "",
       "googleAndroidClientId": "68331201188-nf0usd1st3dmcnk9db9s5upv85lfafr6.apps.googleusercontent.com"

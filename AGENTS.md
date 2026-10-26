@@ -11,20 +11,21 @@ App da SETREM: demandas de pesquisa e TCC encontram quem tem a habilidade.
 
 ## Onde ler o quê
 
-Estes dois ficam na **raiz**, ao lado deste arquivo. O SPEC fica em `docs/` sozinho.
+O SPEC fica em `docs/`; o visual, em `app/`.
 
 | Arquivo | Para quê |
 | --- | --- |
 | `AGENTS.md` | Como trabalhar neste repositório (este arquivo) |
-| `DESIGN.md` | Decisões visuais: paleta, tipo, espaço, botão, raio, tokens |
+| `app/DESIGN.md` | Decisões visuais: paleta, tipo, espaço, botão, raio, tokens |
 | `docs/SPEC.md` | O que o produto faz (Given / When / Then, estados, RNF) |
+| `docs/RODAR_NO_APARELHO.md` | Dev build no aparelho físico (IP da API, SHA-1, clients OAuth) |
 | `contract/openapi.yaml` | HTTP: paths, JSON, erros |
 | `api/` | Servidor Bun |
 | `app/` | Cliente Expo |
 
 Não compartilhe um pacote de Zod entre `api/` e `app/`. O OpenAPI é o contrato comum.
 
-Não invente cor, tipo ou botão. Isso está em `DESIGN.md`. Hex e espaço no código: `app/theme/tokens.ts`.
+Não invente cor, tipo ou botão. Isso está em `app/DESIGN.md`. Hex e espaço no código: `app/src/theme/tokens.ts`.
 
 ## Comandos
 
@@ -66,10 +67,11 @@ Não crie `/login`, `/signin`, `/oauth/callback`. Não use o client secret no Si
 
 ## Como escrever código
 
+- Commit e push só com pedido explícito. Sem isso, deixe o trabalho na árvore.
 - Tipar parâmetros, retorno e JSON. Campo novo: primeiro o OpenAPI, depois o código.
 - Na API, parse com Zod antes de gravar.
 - No app: UI → estado → repositório. A tela não chama a rede.
-- Qualquer tela: leia `DESIGN.md` antes de gerar UI.
+- Qualquer tela: leia `app/DESIGN.md` antes de gerar UI.
 - Login: Google da conta SETREM. Rotas privadas exigem `Authorization: Bearer`.
 - Sem chat, push ou upload de arquivo.
 
@@ -77,5 +79,5 @@ Não crie `/login`, `/signin`, `/oauth/callback`. Não use o client secret no Si
 
 1. `contract/openapi.yaml` (HTTP)
 2. `docs/SPEC.md` (comportamento)
-3. `DESIGN.md` (visual)
+3. `app/DESIGN.md` (visual)
 4. este arquivo (pastas, stack, comandos)

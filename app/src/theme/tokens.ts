@@ -83,6 +83,12 @@ export const type = {
     fontWeight: "400" as const,
     lineHeight: 18,
   },
+  microUppercase: {
+    fontSize: 11,
+    fontWeight: "600" as const,
+    lineHeight: 15,
+    letterSpacing: 0.8,
+  },
   buttonMd: {
     fontSize: 16,
     fontWeight: "600" as const,

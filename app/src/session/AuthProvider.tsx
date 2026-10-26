@@ -11,6 +11,7 @@ import {
 } from "@react-native-google-signin/google-signin";
 import { getApiBaseUrl, getGoogleIosClientId, getGoogleWebClientId } from "@/config";
 import { authLog, describeToken } from "@/lib/logger";
+import { mapNativeSignInErrorCode, shouldRetryMe } from "@/lib/signInErrors";
 import {
   AuthApiError,
   UsuarioSchema,
@@ -193,7 +194,9 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       return;
     }
     // SPEC §3: 401 pede uma renovação automática antes de derrubar a sessão.
-    if (first.error instanceof AuthApiError && first.error.status === 401) {
+    const firstStatus =
+      first.error instanceof AuthApiError ? first.error.status : -1;
+    if (shouldRetryMe(firstStatus, 1)) {
       authLog("session", "validateMe 401 on attempt 1, retrying once");
       const second = await attempt().then(
         (usuario) => ({ ok: true as const, usuario }),
@@ -322,21 +325,20 @@ export function AuthProvider({ children }: { children: ReactNode }) {
         return;
       }
       if (isErrorWithCode(error)) {
+        const code = String(error.code);
         authLog("google", "signIn threw native error", {
-          code: String(error.code),
+          code,
           message: error.message,
         });
-        if (error.code === statusCodes.IN_PROGRESS) {
-          setAuthError("Login já em andamento. Aguarde.");
+        const outcome = mapNativeSignInErrorCode(code, {
+          cancelled: statusCodes.SIGN_IN_CANCELLED,
+          inProgress: statusCodes.IN_PROGRESS,
+          playUnavailable: statusCodes.PLAY_SERVICES_NOT_AVAILABLE,
+        });
+        if (outcome.kind === "cancelled") {
           return;
         }
-        if (error.code === statusCodes.PLAY_SERVICES_NOT_AVAILABLE) {
-          setAuthError("Google Play Services não disponível neste aparelho.");
-          return;
-        }
-        // Qualquer outro código nativo (ex.: DEVELOPER_ERROR / ApiException 10
-        // = SHA-1 ou clientId não conferem no Google Cloud): expõe o código.
-        setAuthError(`Google não liberou o login (${error.code}). Tente de novo.`);
+        setAuthError(outcome.userMessage);
         return;
       }
       if (error instanceof Error) {

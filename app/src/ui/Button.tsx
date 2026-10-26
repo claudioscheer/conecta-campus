@@ -3,10 +3,11 @@ import {
   Pressable,
   StyleSheet,
   Text,
+  View,
   type StyleProp,
   type ViewStyle,
 } from "react-native";
-import { colors, rounded, type } from "@/theme/tokens";
+import { colors, rounded, spacing, type } from "@/theme/tokens";
 
 type ButtonVariant = "primary" | "secondary" | "danger";
 
@@ -18,6 +19,7 @@ type ButtonProps = {
   loading?: boolean;
   testID?: string;
   style?: StyleProp<ViewStyle>;
+  icon?: React.ReactNode;
 };
 
 export function Button({
@@ -28,6 +30,7 @@ export function Button({
   loading = false,
   testID,
   style,
+  icon,
 }: ButtonProps) {
   const isDisabled = disabled || loading;
   return (
@@ -50,7 +53,10 @@ export function Button({
           color={variant === "primary" ? colors.onPrimary : colors.ink}
         />
       ) : (
-        <Text style={[styles.text, styles[`${variant}Text`]]}>{label}</Text>
+        <View style={styles.contentRow}>
+          {icon ? <View style={styles.iconContainer}>{icon}</View> : null}
+          <Text style={[styles.text, styles[`${variant}Text`]]}>{label}</Text>
+        </View>
       )}
     </Pressable>
   );
@@ -62,6 +68,16 @@ const styles = StyleSheet.create({
     borderRadius: rounded.sm,
     paddingHorizontal: 16,
     paddingVertical: 12,
+    alignItems: "center",
+    justifyContent: "center",
+  },
+  contentRow: {
+    flexDirection: "row",
+    alignItems: "center",
+    justifyContent: "center",
+    gap: spacing.xs,
+  },
+  iconContainer: {
     alignItems: "center",
     justifyContent: "center",
   },
