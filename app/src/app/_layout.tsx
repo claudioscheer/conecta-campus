@@ -1,5 +1,6 @@
 import { useEffect } from "react";
 import { Stack } from "expo-router";
+import { StatusBar } from "expo-status-bar";
 import * as SplashScreen from "expo-splash-screen";
 import { AuthProvider, useAuth } from "@/session/AuthProvider";
 import { authLog } from "@/lib/logger";
@@ -21,12 +22,16 @@ function RootNavigator() {
   }
 
   return (
-    <Stack screenOptions={{ headerShown: false }}>
-      <Stack.Protected guard={isSignedIn}>
-        <Stack.Screen name="index" />
-      </Stack.Protected>
-      <Stack.Screen name="login" />
-    </Stack>
+    <>
+      <StatusBar style="dark" />
+      <Stack screenOptions={{ headerShown: false }}>
+        <Stack.Protected guard={isSignedIn}>
+          <Stack.Screen name="index" />
+          <Stack.Screen name="demandas/[id]" />
+        </Stack.Protected>
+        <Stack.Screen name="login" />
+      </Stack>
+    </>
   );
 }
 

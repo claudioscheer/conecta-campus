@@ -35,6 +35,7 @@ cd api && bun install && bun run db:migrate && bun --watch src/index.ts
 cd api && bun test
 cd api && bun run db:generate   # depois de mudar api/db/schema.ts
 cd api && bun run db:ping       # SELECT 1 pelo Drizzle
+cd app && npm install && npm run check
 ```
 
 Health: `GET http://localhost:3000/v1/health` (200 só se o Postgres responder).
@@ -74,6 +75,7 @@ Não crie `/login`, `/signin`, `/oauth/callback`. Não use o client secret no Si
 - Qualquer tela: leia `app/DESIGN.md` antes de gerar UI.
 - Login: Google da conta SETREM. Rotas privadas exigem `Authorization: Bearer`.
 - Sem chat, push ou upload de arquivo.
+- Sem emojis no código, commits, documentação ou respostas do agente. Use texto puro.
 
 ## Se os docs discordarem
 
