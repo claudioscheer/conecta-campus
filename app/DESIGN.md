@@ -465,6 +465,11 @@ App nativo. Sem breakpoint de marketing site.
 - Banner offline full width
 - Teclado: o primário do form sobe com o teclado ou fica acima dele, não esconde o campo focado
 
+### Overlays e Menus Flutuantes
+- No Android, modais/popovers transparentes devem usar `statusBarTranslucent` e `animationType="none"` para evitar salto de status bar e flash de transição nativa.
+- Containers flutuantes (como menu de perfil) devem ter largura explícita (ex.: 280–320px) e contenção de texto com `numberOfLines` e `ellipsizeMode="tail"`.
+- StatusBar: padrão `style="dark"` para telas com fundo `colors.paper`. Telas com hero escuro (login) usam `style="light"`.
+
 ## Iteration Guide
 
 1. Um componente por vez (`button-primary`, `card-demanda`)
